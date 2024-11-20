@@ -4,7 +4,7 @@ import time
 # Hugging Face API URL 및 헤더 정보 설정
 API_URL = "https://api-inference.huggingface.co/models/finiteautomata/bertweet-base-emotion-analysis"
 headers = {
-    "Authorization": "Bearer hf_apiKey"  # 발급받은 API 키로 변경
+    "Authorization": "Bearer hf_apiKey"  # hugging face API key
 }
 
 # 분석할 텍스트 입력
@@ -13,7 +13,7 @@ data = {
 }
 
 
-# 모델 로드 완료 시까지 반복 시도
+# 모델 로드 완료 시까지 반복 시도 - 로딩하는 시간이 꽤 걸리기 때문. 
 while True:
     response = requests.post(API_URL, headers=headers, json=data)
 
