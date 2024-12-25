@@ -16,27 +16,12 @@ subreddit_name = 'SexOffenderSupport'
 data_name = f"{subreddit_name}_extended_posts"
 subreddit = reddit.subreddit(subreddit_name)
 
-# 이전 데이터 로드 (없으면 새로 시작)
-try:
-    existing_data = pd.read_csv(data_name + ".csv")
-    existing_post_ids = set(existing_data["URL"])  # 이미 수집한 URL로 중복 체크
-    print(f"Loaded {len(existing_data)} existing posts.")
-except FileNotFoundError:
-    existing_data = pd.DataFrame()
-    existing_post_ids = set()
-    print("No existing data found. Starting fresh.")
-
-# 새 데이터 수집
 posts_data = []
 
 # 페이징 수집
-limit_per_request = 100  # 한 번에 가져올 게시글 수
-total_limit = 1000  # 새로 가져올 게시글 수
+limit_per_request = 100  # 한 번에 가져올 게시글 수 (최대 100)
+total_limit = 1000  # 총 가져올 게시글 수 (예: 5000)
 after = None  # 초기값 None
-
-# 마지막으로 가져온 게시글 ID 가져오기 (있는 경우)
-if not existing_data.empty:
-    after = existing_data.iloc[-1]["URL"].split("/")[-1]  # URL에서 ID 추출
 
 while len(posts_data) < total_limit:
     # 게시글 수집
@@ -44,16 +29,12 @@ while len(posts_data) < total_limit:
     count = 0
     
     for submission in submissions:
-        if submission.url in existing_post_ids:
-            continue  # 이미 수집된 게시글은 건너뛰기
-
         post_content = {
             "Title": submission.title,
             "Content": submission.selftext,
             "Comments": submission.num_comments,
         }
         posts_data.append(post_content)
-        existing_post_ids.add(submission.url)
         count += 1
     
     # 페이징 정보 업데이트
@@ -61,20 +42,14 @@ while len(posts_data) < total_limit:
     if not after:
         print("No more posts to fetch.")
         break  # 더 이상 가져올 데이터가 없으면 종료
-
+    
     print(f"Fetched {count} more posts. Total collected: {len(posts_data)}")
     time.sleep(1)  # Reddit API rate limit 준수
 
 # DataFrame 생성
-new_data = pd.DataFrame(posts_data)
-
-# 기존 데이터와 새 데이터 합치기
-if not existing_data.empty:
-    final_data = pd.concat([existing_data, new_data], ignore_index=True)
-else:
-    final_data = new_data
+df = pd.DataFrame(posts_data)
 
 # DataFrame 저장
-final_data.to_csv(data_name + ".csv", index=False)
+df.to_csv(data_name + ".csv", index=False)
 
-print(f"Data saved to {data_name}.csv with {len(final_data)} total posts.")
+print(f"Data saved to {data_name}.csv with {len(posts_data)} posts.")
