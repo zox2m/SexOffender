@@ -20,8 +20,8 @@ posts_data = []
 
 # 페이징 수집
 limit_per_request = 100  # 한 번에 가져올 게시글 수 (최대 100)
-total_limit = 1000  # 총 가져올 게시글 수 (예: 5000)
-after = None  # 초기값 None
+total_limit = 2000  # 총 가져올 게시글 수 (예: 5000)
+after = 1000  # 초기값 None
 
 while len(posts_data) < total_limit:
     # 게시글 수집
